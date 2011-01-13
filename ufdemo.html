@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<style>
+body { width: 100% }
+#header, #footer { width: 100%; }
+#image, #controler { float: left; }
+#formula { clear: both; } 
+canvas { border: solid 2px #000; }
+textarea {
+  vertical-align: middle;
+  font-family: "Courier";
+  font-size: 14px;
+}
+input.ctl { width: 270px }
+.caution { 
+  color: red;
+  font-family: "Courier";
+  font-size: 14px;
+}
+</style>
+<title>UserFilter for canvas DEMO</title>
+<script type="text/javascript" src="uf.js"></script>
+</head>
+<body>
+<div id="header">
+<h2>UserFilter for canvas DEMO</h1>
+</div>
+<div id="image">
+image:<br>
+<br>
+<canvas id="canvas" width="256" height="256"></canvas><br>
+file:
+<select id="file">
+<option value="kodim01s.jpg">kodim01</option>
+<option value="kodim08s.jpg">kodim08</option>
+<option value="kodim22s.jpg">kodim22</option>
+<option value="Lenna.jpg">Lenna</option>
+<option value="128">blank: 128x128</option>
+<option value="256" selected>blank: 256x256</option>
+<option value="512">blank: 512x512</option>
+</select>
+</div>
+<div id="controler">
+controler:
+<ol start="0">
+  <li><input type="range" id="c0" class="ctl" min="0" max="255" value="0"><input id="m0" type="text" size="3" value="0"></li> 
+  <li><input type="range" id="c1" class="ctl" min="0" max="255" value="0"><input id="m1" type="text" size="3" value="0"></li> 
+  <li><input type="range" id="c2" class="ctl" min="0" max="255" value="0"><input id="m2" type="text" size="3" value="0"></li>
+  <li><input type="range" id="c3" class="ctl" min="0" max="255" value="0"><input id="m3" type="text" size="3" value="0"></li>
+  <li><input type="range" id="c4" class="ctl" min="0" max="255" value="0"><input id="m4" type="text" size="3" value="0"></li>
+  <li><input type="range" id="c5" class="ctl" min="0" max="255" value="0"><input id="m5" type="text" size="3" value="0"></li>
+  <li><input type="range" id="c6" class="ctl" min="0" max="255" value="0"><input id="m6" type="text" size="3" value="0"></li>
+  <li><input type="range" id="c7" class="ctl" min="0" max="255" value="0"><input id="m7" type="text" size="3" value="0"></li>
+</ol>
+</div>
+<div id="formula">
+<br>
+formula:<br>
+R<textarea id="f0" cols="80" rows="3">r</textarea><span id="e0" class="caution"></span><br>
+G<textarea id="f1" cols="80" rows="3">g</textarea><span id="e1" class="caution"></span><br>
+B<textarea id="f2" cols="80" rows="3">b</textarea><span id="e2" class="caution"></span><br>
+A<textarea id="f3" cols="80" rows="3">A</textarea><span id="e3" class="caution"></span><br>
+<br>
+<button id="apply">apply</button> <button id="start">start</button> <button id="stop">stop</button><br>
+<button id="popup">to PNG</button>
+</div>
+<ul type="square">
+<li>source: <a href="https://github.com/youz/ufjs/"> github.com/youz/ufjs </a>
+<li>reference: <a href="http://gimpuserfilter.sourceforge.net/">UserFilter Plug-in for The Gimp</a>
+</ul>
+<script type="text/javascript">
+var UFJS_DEMO = function () {
+  var $ = function () {
+    return document.getElementById.apply(document, arguments);
+  };
+
+  var canvas = $('canvas');
+  var ctx = canvas.getContext('2d');
+  var UF = new UserFilter();
+
+  /* test
+  UF.addFunction('triple', function (n) { return n * n * n; });
+  UF.addFunction('nx', (function (n) { return X - n; }).toString());
+   */
+
+  function render (reset) {
+    UF.setFormula($('f0').value, $('f1').value, $('f2').value, $('f3').value);
+    for (var i=0; i<8; ++i) {
+      UF.controler[i] = $('c'+i).value * 1;
+    }
+    if (reset) load_image($('file').value);
+    return UF.apply(canvas);
+  }
+
+  var images = {};
+  function load_image(file, cb) {
+    if (!isNaN(file)) {
+      var size = file * 1;
+      canvas.width = canvas.height = size;
+      ctx.putImageData(ctx.createImageData(size, size), 0, 0);
+      if (cb) cb();
+    } else {
+      if (images[file]) {
+        canvas.width = images[file].width;
+        canvas.height = images[file].height;
+        ctx.drawImage(images[file], 0, 0);
+        if (cb) cb();
+      } else {
+        var e = document.createElement('img');
+        e.onload = function () {
+          images[file] = e;
+          canvas.width = e.width;
+          canvas.height = e.height;
+          ctx.drawImage(e, 0, 0);
+          if (cb) cb();
+        };
+        ctx.save();
+        ctx.shadowOffsetX = ctx.shadowOffsetY = ctx.shadowBlur = 1;
+        ctx.shadowColor = '#fff';
+        ctx.fillText("loading:" + file, 0, 20);
+        ctx.restore();
+        e.src = file;
+      };
+    }
+  }
+
+  function load_from_hash() {
+    if (location.hash != '') {
+      var data = location.hash.substr(1).split(/:/);
+      if (data.length < 13) return;
+      for (var i=0; i<8; ++i) $('c'+i).value = $('m'+i).value = data[i];
+      for (i=0; i<4; ++i) $('f'+i).value = decodeURIComponent(data[8+i]);
+      $('file').selectedIndex = data[12] * 1;
+      load_image($('file').value,
+                 function () {
+                   render();
+                   if (data[13]) UF.start(canvas);
+                 });
+    }
+  }
+
+  function save_to_hash() {
+    var forms = ["c0","c1","c2","c3","c4","c5","c6","c7","f0","f1","f2","f3"];
+    var params ='';
+    for (var i in forms) params += encodeURIComponent($(forms[i]).value)+":";
+    params += $('file').selectedIndex;
+    location.hash = params;
+  }
+
+  // setup handlers
+  window.onload = load_from_hash;
+
+  $('apply').onclick = function () {
+    UF.reset_timer();
+    if (render()) save_to_hash();
+  };
+  $('start').onclick = function () {
+    UF.reset_timer();
+    if (render()) {
+      save_to_hash();
+      location.hash += ":1";
+      UF.start(canvas);
+    }
+  };
+  $('stop').onclick = function () {
+    save_to_hash();
+    UF.stop();
+  };
+  $('popup').onclick = function () {
+    var url = canvas.toDataURL();
+    window.open(url);
+  };
+
+  // image selector
+  $('file').onchange = function () {
+    load_image(this.value, save_to_hash);
+  };
+
+  for (var i=0; i<8; ++i) {
+    // slider
+    $('c'+i).onchange = function () {
+      $('m'+this.id.substr(1)).value = this.value;
+      if ([$('f0').value,$('f1').value, $('f2').value, $('f3').value].join('').match(/ctl|val|map/)) {
+        render(true);
+      }
+    };
+
+    // monitor
+    $('m'+i).onchange = function () {
+      var slider = $('c'+this.id.substr(1));
+      slider.value = isNaN(this.value) ? 0 : Math.min(Math.max(Math.round(this.value), 0), 255);
+      slider.onchange();
+    };
+  }
+
+  // formula
+  for (i=0; i<4; ++i) {
+    $('f'+i).onchange = function () {
+      var chk = UF.check(this.value);
+      $('e'+this.id.substr(1)).innerHTML = (chk == 'ok')?'':chk;
+    };
+  }
+
+  return true;
+}();
+</script>
