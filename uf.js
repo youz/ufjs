@@ -4,6 +4,9 @@
  *
  * Copyright 2011, Y.Ushiki
  * released under the MIT license.
+ *
+ * git repository available at
+ * https://github.com/youz/ufjs/
  */
 
 var UserFilter = function () {
@@ -273,6 +276,7 @@ var UserFilter = function () {
     clearInterval(timer);
   };
 
+  // initialize
   if (arguments.length == 4) {
     this.setFormula.apply(this, arguments);
   } else {
