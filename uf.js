@@ -185,10 +185,6 @@ var UserFilter = function () {
   }
 
   function apply_filter (canvas) {
-    if (typeof filters[0] != "function") {
-      return false;
-    }
-
     X = canvas.width;
     Y = canvas.height;
     xmax = X - 1;
@@ -197,12 +193,7 @@ var UserFilter = function () {
     mmax = M - 1;
 
     var ctx = canvas.getContext('2d');
-    try {
-      imagedata = ctx.getImageData(0,0,X,Y);
-    } catch (e) {
-      window.alert(e);
-      return false;
-    }
+    imagedata = ctx.getImageData(0,0,X,Y);
     var data=imagedata.data;
 
     for (var offset=0, y=0; y < Y; ++y) {
@@ -217,8 +208,7 @@ var UserFilter = function () {
           try {
             data[offset + i]   = filters[i](x, y, m, d, r, g, b, a, data[offset + i], i);
           } catch (e) {
-            window.alert("Error in formula: " + "RGBA"[i] + "\n" + e);
-            throw e;
+            throw "Error in formula: " + "RGBA"[i] + "\n" + e;
           }
         }
         offset += 4;
@@ -234,24 +224,36 @@ var UserFilter = function () {
       try {
         filters[i] = make_func(arguments[i]);
       } catch (e) {
-        window.alert("Error in formula: " + "RGBA"[i] + "\n" + e);
-        return false;
+        throw "Error in formula: " + "RGBA"[i] + "\n" + e;
       }
     }
     return true;
   };
   
   this.controler = ctls;
-  this.apply = apply_filter;
-  this.check = function (formula) {
-      var f;
-      try { f = make_func(formula); } catch (e) { return e; }
-      return "ok";
+  this.apply = function (elm) {
+    if (elm.constructor == HTMLCanvasElement) {
+      return apply_filter(elm);
+    } else if (elm.constructor == HTMLImageElement) {
+      var e = document.createElement('canvas');
+      e.width = elm.width;
+      e.height = elm.height;
+      e.getContext('2d').drawImage(elm, 0, 0);
+      var result = apply_filter(e);
+      if (result) elm.src = e.toDataURL();
+      return result;
+    } else {
+      throw "filter can not apply to " + elm.toString();
+    }
   };
-
+  this.check = function (formula) {
+    var f;
+    try { f = make_func(formula); } catch (e) { return e; }
+    return "ok";
+  };
   this.addFunction = function (name, func) {
     user_functions[name] = func;
-  }
+  };
   
   // animation
   var timer;
@@ -273,5 +275,7 @@ var UserFilter = function () {
 
   if (arguments.length == 4) {
     this.setFormula.apply(this, arguments);
+  } else {
+    this.setFormula("r", "g", "b", "a");
   }
 };
