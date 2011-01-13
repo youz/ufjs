@@ -154,11 +154,11 @@ var UFJS_DEMO = function () {
 
   $('apply').onclick = function () {
     UF.reset_timer();
-    if (render()) save_to_hash();
+    if (render(true)) save_to_hash();
   };
   $('start').onclick = function () {
     UF.reset_timer();
-    if (render()) {
+    if (render(true)) {
       save_to_hash();
       location.hash += ":1";
       UF.start(canvas);
