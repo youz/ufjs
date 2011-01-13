@@ -1,3 +1,3 @@
 # UserFilter for canvas
 
-demo: http://youz.github.com/ufjs/ufdemo.html
+[demo](http://youz.github.com/ufjs/ufdemo.html)
