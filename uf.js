@@ -197,7 +197,7 @@ var UserFilter = function () {
 
     var ctx = canvas.getContext('2d');
     imagedata = ctx.getImageData(0,0,X,Y);
-    var data=imagedata.data;
+    var data = imagedata.data.slice(0);
 
     for (var offset=0, y=0; y < Y; ++y) {
       for (var x=0; x < X; ++x) {
@@ -217,6 +217,7 @@ var UserFilter = function () {
         offset += 4;
       }
     }
+    imagedata.data = data;
     ctx.putImageData(imagedata, 0, 0);
     return true;
   }
