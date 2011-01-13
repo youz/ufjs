@@ -29,7 +29,6 @@ var UserFilter = function () {
   // controler values (for ctl, val, map)
   var ctls = [0, 0, 0, 0, 0, 0, 0, 0];
 
-  var imagedata;
 
   // filter functions
   function ctl (i) { return ctls[i]; }
@@ -47,9 +46,10 @@ var UserFilter = function () {
       return 0;
     }
   }
+  var prev = [];
   function src (x, y, z) {
-    if (x < 0 || x > X || y < 0 || y > Y) return 0;
-    return imagedata.data[(x + y * X) * 4 + z];
+    if (x < 0 || x > xmax || y < 0 || y > ymax) return 0;
+    return prev[(x + y * X) * 4 + z];
   }
 
   function rad (d, m, z) {
@@ -196,8 +196,11 @@ var UserFilter = function () {
     mmax = M - 1;
 
     var ctx = canvas.getContext('2d');
-    imagedata = ctx.getImageData(0,0,X,Y);
-    var data = imagedata.data.slice(0);
+    var imagedata = ctx.getImageData(0,0,X,Y);
+    var data = imagedata.data;
+
+    // for 'src' function
+    prev = [].slice.call(data, 0);
 
     for (var offset=0, y=0; y < Y; ++y) {
       for (var x=0; x < X; ++x) {
@@ -217,7 +220,6 @@ var UserFilter = function () {
         offset += 4;
       }
     }
-    imagedata.data = data;
     ctx.putImageData(imagedata, 0, 0);
     return true;
   }
