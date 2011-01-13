@@ -143,22 +143,28 @@ var UserFilter = function () {
   }
 
   // additions
-  function rad2d (rad) { return (rad * 512 / Math.PI) & 1023; }
+  var PI = Math.PI;
+  function rad2d (rad) { return (rad * 512 / PI) & 1023; }
   function deg2d (deg) { return (deg * 1024 / 360) & 1023; }
   var ceil = Math.ceil;
   var floor = Math.floor;
   var log = Math.log;
   var exp = Math.exp;
   var pow = Math.pow;
-
+  
   // for animation
-  var f = 0, t = 0; // frame counter, elapsed time (msec)
+  var f = 0;  // frame counter
+  var t = 0;  // elapsed time from this.start() (msec)
 
   var builtins = [
-    'R','r','rmin','rmax','G','g','gmin','gmax','B','b','bmin','bmax','A','a','amin','amax','C','c','cmin','cmax',
-    'X','x','xmin','xmax','Y','y','ymin','ymax','D','d','dmin','dmax','M','m','mmin','mmax','Z','z','zmin','zmax',
-    'ctl','val','map','src','rad','cnv','min','max','abs','add','dif','sub','rnd','mix','scl','sqr',
-    'sin','cos','tan','r2x','r2y','c2d','c2m','put','get','rad2d','deg2d','f','t'
+    'R','r','rmin','rmax','G','g','gmin','gmax','B','b','bmin','bmax',
+    'A','a','amin','amax','C','c','cmin','cmax','Z','z','zmin','zmax',
+    'X','x','xmin','xmax','Y','y','ymin','ymax',
+    'D','d','dmin','dmax','M','m','mmin','mmax',
+    'ctl','val','map','src','rad','cnv','min','max',
+    'abs','add','dif','sub','rnd','mix','scl',
+    'sqr','sin','cos','tan','r2x','r2y','c2d','c2m','put','get',
+    'PI','rad2d','deg2d','ceil','floor','log','exp','pow','f','t'
     ];
 
   var user_functions = {};
