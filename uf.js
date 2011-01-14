@@ -14,8 +14,10 @@ var UserFilter = function () {
   var rmin = gmin = bmin = amin = cmin = 0;
   var rmax = gmax = bmax = amax = cmax = 255;
   var R = G = B = A = C = 255;
-  // var imin = 0, umin = -56, vmin = -78;
-  // var imax = 255, umax = 56, vmax = 78;
+  /*
+  var imin = 0, umin = -56, vmin = -78;
+  var imax = 255, umax = 56, vmax = 78;
+   */
   var xmin = ymin = mmin = dmin = 0;
   var D = 1024, dmax = 1023;
   var Z = 4, zmin = 0, zmax = 3;
@@ -29,12 +31,15 @@ var UserFilter = function () {
   // controler values (for ctl, val, map)
   var ctls = [0, 0, 0, 0, 0, 0, 0, 0];
 
-
   // filter functions
-  function ctl (i) { return ctls[i]; }
-  function val (i, a, b) {
-    return Math.round(a + ctls[i] * (b-a) / 255);
+  function ctl (i) {
+    return ctls[i];
   }
+
+  function val (i, a, b) {
+    return a + ctls[i] * (b - a) / 255;
+  }
+
   function map (i, n) {
     if (n <= ctls[2*i+1]) {
       return 0;
@@ -46,10 +51,11 @@ var UserFilter = function () {
       return 0;
     }
   }
+  
   var prev = [];
   function src (x, y, z) {
-    if (x < 0 || x > xmax || y < 0 || y > ymax) return 0;
-    return prev[(x + y * X) * 4 + z];
+    if (x < 0 || x >= X || y < 0 || y >= Y) return 0;
+    return prev[(Math.floor(x) + Math.floor(y) * X) * 4 + z];
   }
 
   function rad (d, m, z) {
@@ -59,14 +65,14 @@ var UserFilter = function () {
   function _cnv (x, y, z) {
     return function (m11, m12, m13, m21, m22, m23, m31, m32, m33, d) {
       return (m11 * src(x-1, y-1, z) +
-	      m12 * src(x, y-1, z) +
-	      m13 * src(x+1, y-1, z) +
-	      m21 * src(x-1, y, z) +
-	      m22 * src(x, y, z) +
-	      m23 * src(x+1, y, z) +
-	      m31 * src(x-1, y+1, z) +
-	      m32 * src(x, y+1, z) +
-	      m33 * src(x+1, y+1, z)) / d;
+              m12 * src(x, y-1, z) +
+              m13 * src(x+1, y-1, z) +
+              m21 * src(x-1, y, z) +
+              m22 * src(x, y, z) +
+              m23 * src(x+1, y, z) +
+              m31 * src(x-1, y+1, z) +
+              m32 * src(x, y+1, z) +
+              m33 * src(x+1, y+1, z)) / d;
     };
   }
 
@@ -104,7 +110,7 @@ var UserFilter = function () {
 
   var sintbl = [];
   for (var d = 0; d < 1024; ++d) {
-    sintbl[d] = Math.round(Math.sin(Math.PI * d / 512) * 1024);
+    sintbl[d] = Math.sin(Math.PI * d / 512) * 1024;
   }
 
   function sin (x) {
@@ -116,13 +122,18 @@ var UserFilter = function () {
     return (_cos == 0) ? 0 : 1024 * sintbl[x & 1023] / _cos;
   }
 
-  function r2x (d, m) { return m * cos(d); }
-  function r2y (d, m) { return m * sin(d); }
+  function r2x (d, m) {
+    return m * cos(d) / 1024;
+  }
+
+  function r2y (d, m) {
+    return m * sin(d) / 1024;
+  }
 
   function c2d (x, y) {
     var dx = x - X/2;
     var dy = Y/2 - y;
-    return (Math.atan2(dy, dx) * 512 / Math.PI) & 1023;
+    return Math.atan2(dy, dx) * 512 / Math.PI + (dy > 0 ? 0 : 1024);
   }
 
   function c2m (x, y) {
@@ -164,7 +175,8 @@ var UserFilter = function () {
     'ctl','val','map','src','rad','cnv','min','max',
     'abs','add','dif','sub','rnd','mix','scl',
     'sqr','sin','cos','tan','r2x','r2y','c2d','c2m','put','get',
-    'PI','rad2d','deg2d','ceil','floor','log','exp','pow','f','t'
+    'PI','rad2d','deg2d','ceil','floor','log','exp','pow',
+    'f','t'
     ];
 
   var user_functions = {};
@@ -202,7 +214,7 @@ var UserFilter = function () {
     mmax = M - 1;
 
     var ctx = canvas.getContext('2d');
-    var imagedata = ctx.getImageData(0,0,X,Y);
+    var imagedata = ctx.getImageData(0, 0, X, Y);
     var data = imagedata.data;
 
     // for 'src' function
@@ -216,11 +228,16 @@ var UserFilter = function () {
         var g = data[offset+1];
         var b = data[offset+2];
         var a = data[offset+3];
-        for (var i=0; i<4; ++i) {
+        /*
+        var i = (76*r + 150*g + 29*b) / 256;
+        var u = (-19*r - 37*g + 56*b) / 256;
+        var v = (78*r - 65*g - 13*b) / 256;
+         */
+        for (var z=0; z<4; ++z) {
           try {
-            data[offset + i]   = filters[i](x, y, m, d, r, g, b, a, data[offset + i], i);
+            data[offset + z] = filters[z](x, y, m, d, r, g, b, a, data[offset + z], z);
           } catch (e) {
-            throw "Error in formula: " + "RGBA"[i] + "\n" + e;
+            throw "Error in formula: " + "RGBA"[z] + "\n" + e;
           }
         }
         offset += 4;
@@ -259,8 +276,7 @@ var UserFilter = function () {
     }
   };
   this.check = function (formula) {
-    var f;
-    try { f = make_func(formula); } catch (e) { return e; }
+    try { make_func(formula); } catch (e) { return e; }
     return "ok";
   };
   this.addFunction = function (name, func) {
