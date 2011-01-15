@@ -2,7 +2,7 @@
 A clone of ["UserFilter Plug-in for The Gimp"](http://gimpuserfilter.sourceforge.net/) for canvas
 
 ## DEMO
-http://youz.github.com/ufjs/ufdemo.html
+<http://youz.github.com/ufjs/ufdemo.html>
 
 
 ## samples
