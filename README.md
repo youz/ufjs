@@ -13,7 +13,7 @@ A clone of ["UserFilter Plug-in for The Gimp"](http://gimpuserfilter.sourceforge
 ### pattern
 - [x ^ y](http://youz.github.com/ufjs/ufdemo.html?#0:0:0:0:0:0:0:0:x%5Ey:x%5Ey:x%5Ey:255:5)
 - [delicious?](http://youz.github.com/ufjs/ufdemo.html?#0:0:0:0:0:0:0:0:x%5Ey:x%5Ey:x%7Cy:255:5)
-- [fractal](http://youz.github.com/ufjs/ufdemo.html?#0:0:0:0:0:0:0:0:put%28%28x%26y%29%3FC-%28x+y%29/8%3A0%2C0%29:get%280%29:get%280%29:255:5)
+- [Sierpinski triangle](http://youz.github.com/ufjs/ufdemo.html?#0:0:0:0:0:0:0:0:put%28%28x%26y%29%3FC-%28x+y%29/8%3A0%2C0%29:get%280%29:get%280%29:255:5)
 - [polar coordinates](http://youz.github.com/ufjs/ufdemo.html?#0:0:0:0:0:0:0:0:m%5Ed%2F4:m%5Ed%2F4:m%5Ed%2F4:255:5)
 
 ### animation

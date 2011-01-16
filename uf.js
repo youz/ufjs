@@ -286,16 +286,15 @@ var UserFilter = function () {
   // animation
   var timer;
   this.reset_timer = function () { f = 0; };
-  this.start = function (canvas) {
+  this.start = function (canvas, interval) {
     clearInterval(timer);
-    var interval = arguments[1] || 33;
     var start_time = new Date();
     f = 0;
     timer = setInterval(
       function () {
         f++; t = new Date() - start_time;
         if (!apply_filter(canvas)) clearInterval(timer);
-      }, interval);
+      }, interval || 33);
   };
   this.stop = function () {
     clearInterval(timer);
