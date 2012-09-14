@@ -15,7 +15,7 @@ body,#bg {
   background-color: rgba(255,255,255,0.7);
 }
 #header { width: 100% }
-#image, #controler {
+#image, #controller {
   float: left;
   padding: 5px 5px;
 }
@@ -56,8 +56,8 @@ file:
 <br>
 <canvas id="canvas" width="256" height="256"></canvas><br>
 </div>
-<div id="controler">
-controler:
+<div id="controller">
+controller:
 <ol start="0">
   <li><input type="range" id="c0" class="ctl" min="0" max="255" value="0"><input id="m0" type="text" size="3" value="0"></li> 
   <li><input type="range" id="c1" class="ctl" min="0" max="255" value="0"><input id="m1" type="text" size="3" value="0"></li> 
@@ -97,7 +97,7 @@ var UFJS_DEMO = function () {
   function render (reset) {
     UF.setFormula($('f0').value, $('f1').value, $('f2').value, $('f3').value);
     for (var i=0; i<8; ++i) {
-      UF.controler[i] = $('c'+i).value * 1;
+      UF.controller[i] = $('c'+i).value * 1;
     }
     if (reset) load_image($('file').value);
     return UF.apply(canvas);

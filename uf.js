@@ -28,7 +28,7 @@ var UserFilter = function () {
   // filter functions for each channel
   var filters = new Array(4);
 
-  // controler values (for ctl, val, map)
+  // controller values (for ctl, val, map)
   var ctls = [0, 0, 0, 0, 0, 0, 0, 0];
 
   // filter functions
@@ -259,7 +259,7 @@ var UserFilter = function () {
     return true;
   };
   
-  this.controler = ctls;
+  this.controller = ctls;
   this.apply = function (elm) {
     if (elm.constructor == HTMLCanvasElement) {
       return apply_filter(elm);
